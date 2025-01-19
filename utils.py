@@ -1,4 +1,10 @@
 from PIL import Image, ImageDraw, ImageFont, ImageOps
+from prompt_template import system_template_text, user_template_text
+from langchain_openai import ChatOpenAI
+from langchain.output_parsers import PydanticOutputParser
+from langchain.prompts import ChatPromptTemplate
+from blessing_model import Blessing
+
 import re
 
 def create_text_image(my_text, image_size=(320, 320), background_color='orange', text_color='white', delimiters=r'[，。,.\n]'):
@@ -45,3 +51,19 @@ def count_any_chars(s):
         if '\u4e00' <= char <= '\u9fff' or char.isalpha():
             count += 1
     return count
+
+
+def generate_my_blessing(theme, openai_api_key):
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", system_template_text),
+        ("user", user_template_text)
+    ])
+    model = ChatOpenAI(model="gpt-3.5-turbo-0125", api_key=openai_api_key)
+    output_parser = PydanticOutputParser(pydantic_object=Blessing)
+    chain = prompt | model | output_parser
+    print("get_format_instructions: " + output_parser.get_format_instructions())
+    result = chain.invoke({
+        "parser_instructions": output_parser.get_format_instructions(),
+        "theme": theme
+    })
+    return result

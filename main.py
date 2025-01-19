@@ -1,7 +1,7 @@
 import streamlit as st
 from st_copy_to_clipboard import st_copy_to_clipboard
 
-from utils import create_text_image, count_any_chars
+from utils import create_text_image, count_any_chars, generate_my_blessing
 
 # CSS Styles
 st.markdown("""
@@ -53,13 +53,14 @@ with column21:
         one_sentence_blessing = st.text_input("default", value=one_sentence_blessing_val, label_visibility="hidden")
     else:
         one_sentence_blessing = st.text_input("default", value="", label_visibility="hidden")
-    
+
 
 with column22:
     st.text("")
-    if st.button("随心生成"): 
+    if st.button("随心生成") and one_sentence_blessing: 
         with st.spinner("AI正在创作中,请稍后..."):
-            st.session_state["my_blessing"] = "888"
+            content = generate_my_blessing(theme="藏头诗为:" + one_sentence_blessing, openai_api_key=st.secrets["openai_api_key"])
+            st.session_state["my_blessing"] = content
 
 
 best_wishes = st.text_area("default", value=st.session_state["my_blessing"], height=210, label_visibility="hidden")
