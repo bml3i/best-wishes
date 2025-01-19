@@ -37,3 +37,11 @@ def create_text_image(my_text, image_size=(320, 320), background_color='orange',
     img_fitted = ImageOps.fit(image, (new_width, new_height), Image.Resampling.LANCZOS, centering=(0.5, 0.5))
 
     return img_fitted
+
+
+def count_any_chars(s):
+    count = 0
+    for char in s:
+        if '\u4e00' <= char <= '\u9fff' or char.isalpha():
+            count += 1
+    return count
