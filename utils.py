@@ -11,17 +11,10 @@ def create_text_image(my_text, image_size=(320, 320), background_color='orange',
     except IOError:
         font = ImageFont.load_default()
     
-    # Split words into multi-lines
-    # BAK: lines = [my_text[i:i + 8] for i in range(0, len(my_text), 8)]
-    
+    # Split words into multi-lines    
     text_array = re.sub(delimiters, ' ', my_text)
     lines = text_array.split()
-
-    max_line_length = max(map(len, lines))
-
-    print(lines)
-    print("len(lines):" + str(len(lines)))
-    
+    max_line_words_len = max(map(len, lines))
 
     EXTRA_HEIGHT_BUFFER = 12
     line_height = (font.getbbox('Mg')[3] - font.getbbox('Mg')[1]) + EXTRA_HEIGHT_BUFFER
@@ -31,11 +24,11 @@ def create_text_image(my_text, image_size=(320, 320), background_color='orange',
     
     # Draw text on the image
     for line in lines:
-        x = (image_size[0] - word_width * max_line_length) / 2
+        x = (image_size[0] - word_width * max_line_words_len) / 2
         draw.text((x, y), line, fill=text_color, font=font)
         y += line_height
 
-    # Change Image DPI
+    # Change Image dpi to 300
     dpi = image.info.get('dpi', (72, 72))
     new_width = int(image_size[0] * (300 / dpi[0]))
     new_height = int(image_size[1] * (300 / dpi[1]))

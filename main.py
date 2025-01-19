@@ -2,7 +2,7 @@ import streamlit as st
 
 from utils import create_text_image
 
-st.title("Best Wishes 🌸")
+st.title("🌸 美好祝愿 - 随心生成 🌸")
 
 initial_text = """明日朝阳映瑞雪，
 磊落人生喜气多。
@@ -20,7 +20,7 @@ st.write(para)
 # 创建一个按钮
 if st.button("生成图片"):
     # 当按钮被点击时，生成图片
-    image = create_text_image(my_text = para)
+    image = create_text_image(my_text = para, delimiters=r'[\n]')
     # 显示生成的图片
     st.image(image, caption="生成的图片")
 
