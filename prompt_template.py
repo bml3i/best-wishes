@@ -1,6 +1,3 @@
-system_template_text = """马上就要蛇年农历新年了，帮我写一首拜年藏头诗，七言律诗，用换行符分隔。
+system_template_text = """"""
 
-{parser_instructions}
-"""
-
-user_template_text = "{theme}"
+user_template_text = """马上就要蛇年农历新年了，帮我写一首8段拜年藏头诗，100个汉字以内，每行的首字分别为"{theme}"，只包含七言诗即可，用换行符分隔，不要包含其他内容。"""

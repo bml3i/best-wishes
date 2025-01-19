@@ -1,6 +1,7 @@
 import streamlit as st
-from st_copy_to_clipboard import st_copy_to_clipboard
+import os
 
+from st_copy_to_clipboard import st_copy_to_clipboard
 from utils import create_text_image, count_any_chars, generate_my_blessing
 
 # CSS Styles
@@ -58,9 +59,10 @@ with column21:
 with column22:
     st.text("")
     if st.button("随心生成") and one_sentence_blessing: 
+        print("one_sentence_blessing: " + one_sentence_blessing)
         with st.spinner("AI正在创作中,请稍后..."):
-            content = generate_my_blessing(theme="藏头诗为:" + one_sentence_blessing, openai_api_key=st.secrets["openai_api_key"])
-            st.session_state["my_blessing"] = content
+            result = generate_my_blessing(theme=one_sentence_blessing, openai_api_key=st.secrets["openai_api_key"])
+            st.session_state["my_blessing"] = result.content
 
 
 best_wishes = st.text_area("default", value=st.session_state["my_blessing"], height=210, label_visibility="hidden")
@@ -74,3 +76,5 @@ if st.button("生成图片 & 复制祝福"):
     # 显示生成的图片
     st.image(image)
 
+print(os.environ.get('HTTP_PROXY'))
+print(os.environ.get('HTTPS_PROXY'))
