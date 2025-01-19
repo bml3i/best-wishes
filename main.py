@@ -4,7 +4,14 @@ from utils import create_text_image
 
 st.title("Best Wishes 🌸")
 
-initial_text = """明日朝阳映瑞雪，磊落人生喜气多。祝愿声声传四海，您心所愿皆成真。新春佳节福星照，春风送暖入屠苏。快意人生添欢笑，乐享天伦共此时。"""
+initial_text = """明日朝阳映瑞雪，
+磊落人生喜气多。
+祝愿声声传四海，
+您心所愿皆成真。
+新春佳节福星照，
+春风送暖入屠苏。
+快意人生添欢笑，
+乐享天伦共此时。"""
 
 para = st.text_area("输入一段话吧?", value=initial_text )
 
