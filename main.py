@@ -1,5 +1,5 @@
 import streamlit as st
-import pyperclip
+from st_copy_to_clipboard import st_copy_to_clipboard
 
 from utils import create_text_image, count_any_chars
 
@@ -69,7 +69,7 @@ best_wishes = st.text_area("default", value=st.session_state["my_blessing"], hei
 if st.button("生成图片 & 复制祝福"):
     # 当按钮被点击时，生成图片
     image = create_text_image(my_text = best_wishes, delimiters=r'[\n]')
-    pyperclip.copy(best_wishes)
+    st_copy_to_clipboard(best_wishes)
     # 显示生成的图片
     st.image(image)
 
