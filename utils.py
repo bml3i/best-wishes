@@ -5,9 +5,11 @@ def create_text_image(my_text, image_size=(320, 320), background_color='orange',
     # New Image
     image = Image.new('RGB', image_size, background_color)
     draw = ImageDraw.Draw(image)
+
+    FONT_SIZE = 24
     
     try:
-        font = ImageFont.truetype("fonts/simsun.ttc", 24)
+        font = ImageFont.truetype("fonts/simsun.ttc", FONT_SIZE)
     except IOError:
         font = ImageFont.load_default()
     
