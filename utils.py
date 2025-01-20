@@ -1,9 +1,7 @@
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 from prompt_template import system_template_text, user_template_text
 from langchain_openai import ChatOpenAI
-#from langchain.output_parsers import PydanticOutputParser
 from langchain.prompts import ChatPromptTemplate
-#from blessing_model import Blessing
 
 import re
 
@@ -59,11 +57,8 @@ def generate_my_blessing(theme, openai_api_key):
         ("user", user_template_text)
     ])
     model = ChatOpenAI(model="gpt-4o", api_key=openai_api_key)
-    #output_parser = PydanticOutputParser(pydantic_object=Blessing)
-    chain = prompt | model #| output_parser
-    # print("get_format_instructions: " + output_parser.get_format_instructions())
+    chain = prompt | model
     result = chain.invoke({
-        #"parser_instructions": output_parser.get_format_instructions(),
         "theme": theme
     })
     return result
