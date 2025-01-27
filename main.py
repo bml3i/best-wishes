@@ -30,7 +30,12 @@ current_date = datetime.now(shanghai_tz).date()
 # Display the current date and time in Shanghai
 # st.write(f"Current date and time in Shanghai: {current_date}")
 
-st.title("🌸 美好祝愿 - 随心生成 🌸")
+if "chance_number" not in st.session_state:
+    st.session_state.chance_number = 3
+
+
+st.title(f"🌸 美好祝愿 - 随心生成 🌸")
+
 
 column11, column12 = st.columns(2)
 
@@ -70,7 +75,6 @@ with column21:
         one_sentence_blessing = st.text_input("default", value="", label_visibility="hidden")
 
 
-
 with column22:
     st.text("")
     if st.button("随心生成") and one_sentence_blessing: 
@@ -78,9 +82,14 @@ with column22:
         current_time = time.time()
         if current_time - st.session_state.last_click_time >= 10:
             st.session_state.last_click_time = current_time
-            with st.spinner("AI正在创作中,请稍后..."):
-                result = generate_my_blessing(theme=one_sentence_blessing, openai_api_key=st.secrets["openai_api_key"])
-                st.session_state["my_blessing"] = result.content
+
+            if st.session_state.chance_number <= 0: 
+                st.error("使用次数已达到上限，关注微信号解锁更多使用次数。")
+            else: 
+                with st.spinner("AI正在创作中,请稍后..."):
+                    result = generate_my_blessing(theme=one_sentence_blessing, openai_api_key=st.secrets["openai_api_key"])
+                    st.session_state["my_blessing"] = result.content
+                    st.session_state.chance_number = st.session_state.chance_number - 1
         else:
             st.warning("操作频繁，请稍后再试。")
 
@@ -91,6 +100,11 @@ if st.button("生成图片 & 复制祝福"):
     image = create_text_image(my_text = best_wishes, delimiters=r'[\n]')
     st_copy_to_clipboard(best_wishes)
     st.image(image)
+
+footer = st.container()
+with footer:
+    st.write("关注微信公众号\"小众生活评测\"，回复内容“美好祝愿”，解锁更多权限。")
+    st.write(f"(今日剩余次数: {st.session_state.chance_number})")
 
 print(os.environ.get('HTTP_PROXY'))
 print(os.environ.get('HTTPS_PROXY'))
