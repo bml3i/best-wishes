@@ -1,6 +1,8 @@
 import streamlit as st
 import os
 import time
+from datetime import datetime
+import pytz
 
 from st_copy_to_clipboard import st_copy_to_clipboard
 from utils import create_text_image, count_any_chars, generate_my_blessing
@@ -19,6 +21,14 @@ img {
 </style>
 """, unsafe_allow_html=True)
 
+# Set the timezone to Shanghai
+shanghai_tz = pytz.timezone('Asia/Shanghai')
+
+# Get the current date
+current_date = datetime.now(shanghai_tz).date()
+
+# Display the current date and time in Shanghai
+# st.write(f"Current date and time in Shanghai: {current_date}")
 
 st.title("🌸 美好祝愿 - 随心生成 🌸")
 
@@ -42,22 +52,23 @@ if 'last_click_time' not in st.session_state:
     st.session_state.last_click_time = 0
 
 with column11:
-    your_name = st.text_input("你的名字?")
+    your_name = st.text_input("你的名字/对方的名字?")
     if(len(your_name) > 0 and count_any_chars(your_name) != 2): 
         your_name_alert = st.info("请输入2个汉字")
 
 with column12: 
-    selected_wish_type = st.selectbox("祝福短语模板", options=["XX祝您新春快乐", "XX祝您全家幸福"])
-
+    selected_wish_type = st.selectbox("祝福短语模板", options=["------ 用你的名字送去祝福 ------","XX祝您新春快乐", "XX祝您全家幸福",
+        "------ 用对方的名字送去祝福 ------", "XX蛇年吉祥如意", "XX春节笑口常开", "XX蛇年健康长寿"])
 
 column21, column22 = st.columns(2)
 
 with column21:
-    if selected_wish_type and your_name and your_name_alert is None: 
+    if selected_wish_type and your_name and your_name_alert is None and "XX" in selected_wish_type: 
         one_sentence_blessing_val = selected_wish_type.replace("XX", your_name)
         one_sentence_blessing = st.text_input("default", value=one_sentence_blessing_val, label_visibility="hidden")
     else:
         one_sentence_blessing = st.text_input("default", value="", label_visibility="hidden")
+
 
 
 with column22:
@@ -74,8 +85,7 @@ with column22:
             st.warning("操作频繁，请稍后再试。")
 
 
-best_wishes = st.text_area("default", value=st.session_state["my_blessing"], height=210, label_visibility="hidden")
-
+best_wishes = st.text_area("default", value=st.session_state["my_blessing"], height=220, label_visibility="hidden")
 
 if st.button("生成图片 & 复制祝福"):
     image = create_text_image(my_text = best_wishes, delimiters=r'[\n]')
