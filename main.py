@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+import time
 
 from st_copy_to_clipboard import st_copy_to_clipboard
 from utils import create_text_image, count_any_chars, generate_my_blessing
@@ -17,6 +18,7 @@ img {
 
 </style>
 """, unsafe_allow_html=True)
+
 
 st.title("🌸 美好祝愿 - 随心生成 🌸")
 
@@ -36,6 +38,8 @@ initial_text = """明日朝阳映瑞雪，
 if "my_blessing" not in st.session_state:
     st.session_state["my_blessing"] = initial_text
 
+if 'last_click_time' not in st.session_state:
+    st.session_state.last_click_time = 0
 
 with column11:
     your_name = st.text_input("你的名字?")
@@ -60,9 +64,14 @@ with column22:
     st.text("")
     if st.button("随心生成") and one_sentence_blessing: 
         print("one_sentence_blessing: " + one_sentence_blessing)
-        with st.spinner("AI正在创作中,请稍后..."):
-            result = generate_my_blessing(theme=one_sentence_blessing, openai_api_key=st.secrets["openai_api_key"])
-            st.session_state["my_blessing"] = result.content
+        current_time = time.time()
+        if current_time - st.session_state.last_click_time >= 10:
+            st.session_state.last_click_time = current_time
+            with st.spinner("AI正在创作中,请稍后..."):
+                result = generate_my_blessing(theme=one_sentence_blessing, openai_api_key=st.secrets["openai_api_key"])
+                st.session_state["my_blessing"] = result.content
+        else:
+            st.warning("操作频繁，请稍后再试。")
 
 
 best_wishes = st.text_area("default", value=st.session_state["my_blessing"], height=210, label_visibility="hidden")
