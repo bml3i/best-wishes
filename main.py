@@ -3,6 +3,7 @@ import os
 import time
 from datetime import datetime
 import pytz
+import hashlib
 
 from st_copy_to_clipboard import st_copy_to_clipboard
 from utils import create_text_image, count_any_chars, generate_my_blessing
@@ -22,6 +23,10 @@ img {
 </style>
 """, unsafe_allow_html=True)
 
+def generate_md5(input_string):
+    md5_hash = hashlib.md5()
+    md5_hash.update(input_string.encode('utf-8'))
+    return md5_hash.hexdigest()
 
 controller = CookieController()
 
@@ -31,22 +36,44 @@ shanghai_tz = pytz.timezone('Asia/Shanghai')
 # Get the current date
 current_date = datetime.now(shanghai_tz).date()
 
-leftCountCookieName = "lc" + str(current_date)
+# define cookie names
+chanceCookieName = "cc" + str(current_date)
+couponCookieName = "cp"
+couponSalt = st.secrets["coupon_salt"]
 
-# Display the current date and time in Shanghai
-# st.write(f"Current date and time in Shanghai: {current_date}")
+
+couponCookieValue = controller.get(couponCookieName)
+chanceCookieValue = controller.get(chanceCookieName)
+time.sleep(0.5) # the sleep here is important
 
 
-if "chance_number" not in st.session_state:
-    st.session_state.chance_number = 1
+if chanceCookieValue is None:
+    if "chance_number" not in st.session_state:
+        # set default chance number to 5
+        st.session_state.chance_number = 5
+else:
+    print("chanceCookieValue:" + str(chanceCookieValue))
+    st.session_state.chance_number = chanceCookieValue
 
-# overwrite change number to 0, if current day's count is 0
-if controller.get(leftCountCookieName) is 0:
-    st.session_state.chance_number = 0
+if couponCookieValue is None:
+    controller.set(couponCookieName, "")
+    couponCookieValue = ""
 
+if st.query_params.get("s"): 
+    s_param = st.query_params.get("s")
+
+    if s_param not in controller.get(couponCookieName):
+        if len(s_param) >= 4 and s_param in generate_md5(str(current_date) + couponSalt):
+            # st.write("original cookie value: " + couponCookieValue)
+            controller.set(couponCookieName, couponCookieValue + "." + s_param)
+            controller.set(chanceCookieName, st.session_state.chance_number + 10)
+            st.session_state.chance_number = st.session_state.chance_number + 10
+            st.info("使用次数+10")
+
+# print md5
+print(generate_md5(str(current_date) + couponSalt))
 
 st.title(f"🌸 美好祝愿 - 随心生成 🌸")
-
 
 column11, column12 = st.columns(2)
 
@@ -93,15 +120,14 @@ with column22:
         current_time = time.time()
 
         if st.session_state.chance_number > 0: 
-            if current_time - st.session_state.last_click_time >= 10:
+            if current_time - st.session_state.last_click_time >= 8:
                 st.session_state.last_click_time = current_time
                 with st.spinner("AI正在创作中,请稍后..."):
                     result = generate_my_blessing(theme=one_sentence_blessing, openai_api_key=st.secrets["openai_api_key"])
                     st.session_state["my_blessing"] = result.content
-                    st.session_state.chance_number = st.session_state.chance_number - 1
-
-                    if st.session_state.chance_number is 0:
-                        controller.set(leftCountCookieName, 0)
+                    new_change_number = st.session_state.chance_number - 1
+                    st.session_state.chance_number = new_change_number
+                    controller.set(chanceCookieName, new_change_number)
             else:
                 st.warning("操作频繁，请稍后再试。")
         else: 
