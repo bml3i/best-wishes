@@ -6,6 +6,7 @@ import pytz
 
 from st_copy_to_clipboard import st_copy_to_clipboard
 from utils import create_text_image, count_any_chars, generate_my_blessing
+from streamlit_cookies_controller import CookieController
 
 # CSS Styles
 st.markdown("""
@@ -21,17 +22,27 @@ img {
 </style>
 """, unsafe_allow_html=True)
 
+
+controller = CookieController()
+
 # Set the timezone to Shanghai
 shanghai_tz = pytz.timezone('Asia/Shanghai')
 
 # Get the current date
 current_date = datetime.now(shanghai_tz).date()
 
+leftCountCookieName = "lc" + str(current_date)
+
 # Display the current date and time in Shanghai
 # st.write(f"Current date and time in Shanghai: {current_date}")
 
+
 if "chance_number" not in st.session_state:
-    st.session_state.chance_number = 3
+    st.session_state.chance_number = 1
+
+# overwrite change number to 0, if current day's count is 0
+if controller.get(leftCountCookieName) is 0:
+    st.session_state.chance_number = 0
 
 
 st.title(f"🌸 美好祝愿 - 随心生成 🌸")
@@ -80,18 +91,21 @@ with column22:
     if st.button("随心生成") and one_sentence_blessing: 
         print("one_sentence_blessing: " + one_sentence_blessing)
         current_time = time.time()
-        if current_time - st.session_state.last_click_time >= 10:
-            st.session_state.last_click_time = current_time
 
-            if st.session_state.chance_number <= 0: 
-                st.error("使用次数已达到上限，关注微信号解锁更多使用次数。")
-            else: 
+        if st.session_state.chance_number > 0: 
+            if current_time - st.session_state.last_click_time >= 10:
+                st.session_state.last_click_time = current_time
                 with st.spinner("AI正在创作中,请稍后..."):
                     result = generate_my_blessing(theme=one_sentence_blessing, openai_api_key=st.secrets["openai_api_key"])
                     st.session_state["my_blessing"] = result.content
                     st.session_state.chance_number = st.session_state.chance_number - 1
-        else:
-            st.warning("操作频繁，请稍后再试。")
+
+                    if st.session_state.chance_number is 0:
+                        controller.set(leftCountCookieName, 0)
+            else:
+                st.warning("操作频繁，请稍后再试。")
+        else: 
+            st.error("使用次数已达到上限，关注微信号解锁更多使用次数。")
 
 
 best_wishes = st.text_area("default", value=st.session_state["my_blessing"], height=220, label_visibility="hidden")
